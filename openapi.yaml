@@ -1,0 +1,310 @@
+openapi: 3.0.3
+info:
+  title: Modbus Emulator API
+  description: Modbus设备模拟器的RESTful API接口
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: 本地开发服务器
+
+paths:
+  /slaves:
+    get:
+      summary: 获取所有设备基础信息
+      description: 返回所有已配置的Modbus从站设备的基础信息列表，包括设备ID、标题和协议类型
+      responses:
+        '200':
+          description: 成功获取所有设备基础信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 0
+                  errMsg:
+                    type: string
+                    example: 'ok'
+                  dataSet:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        slaveId:
+                          type: integer
+                          description: 从站设备ID
+                          example: 1
+                        title:
+                          type: string
+                          description: 从站设备标题/别名
+                          example: 'Slave 1'
+                        protocol:
+                          type: string
+                          description: 协议类型
+                          example: 'modbus-tcp'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 500
+                  errMsg:
+                    type: string
+                    example: '服务器内部错误'
+
+  /slaves/{slaveId}:
+    get:
+      summary: 获取单个设备详细信息
+      description: 返回指定Modbus从站设备的详细信息，包括基础信息和所有点位数据
+      parameters:
+        - name: slaveId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 从站设备ID
+      responses:
+        '200':
+          description: 成功获取设备详细信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 0
+                  errMsg:
+                    type: string
+                    example: 'ok'
+                  data:
+                    type: object
+                    properties:
+                      slaveId:
+                        type: integer
+                        description: 从站设备ID
+                        example: 1
+                      title:
+                        type: string
+                        description: 从站设备标题/别名
+                        example: 'Slave 1'
+                      protocol:
+                        type: string
+                        description: 协议类型
+                        example: 'modbus-tcp'
+                      points:
+                        type: object
+                        properties:
+                          coils:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                address:
+                                  type: integer
+                                value:
+                                  type: boolean
+                          discreteInputs:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                address:
+                                  type: integer
+                                value:
+                                  type: boolean
+                          holdingRegisters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                address:
+                                  type: integer
+                                value:
+                                  type: integer
+                          inputRegisters:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                address:
+                                  type: integer
+                                value:
+                                  type: integer
+        '404':
+          description: 设备未找到
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 404
+                  errMsg:
+                    type: string
+                    example: 'Slave not found'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 500
+                  errMsg:
+                    type: string
+                    example: '服务器内部错误'
+
+  /slaves/{slaveId}/subscribe:
+    get:
+      summary: 订阅设备点位数据变更事件
+      description: 使用Server-Sent Events (SSE)技术实时接收指定Modbus从站设备的点位数据变更通知
+      parameters:
+        - name: slaveId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 从站设备ID
+      responses:
+        '200':
+          description: 连接成功，开始接收事件流
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  data: {"type":"connected","message":"Subscribed to slave updates"}
+                  
+                  data: {"slaveId":1,"type":"coils","address":0,"value":true}
+        '404':
+          description: 设备未找到
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 404
+                  errMsg:
+                    type: string
+                    example: 'Slave not found'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 500
+                  errMsg:
+                    type: string
+                    example: '服务器内部错误'
+
+  /slaves/{slaveId}/set-point:
+    post:
+      summary: 设置单个点位数据
+      description: 设置指定Modbus从站设备的单个点位数据
+      parameters:
+        - name: slaveId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 从站设备ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: 数据类型
+                  enum: [coils, discreteInputs, holdingRegisters, inputRegisters]
+                  example: 'coils'
+                address:
+                  type: integer
+                  description: 点位地址
+                  example: 0
+                value:
+                  oneOf:
+                    - type: boolean
+                    - type: integer
+                    - type: string
+                  description: 点位值（线圈支持布尔值或0/1，寄存器支持整数或十六进制字符串）
+                  example: true
+              required:
+                - type
+                - address
+                - value
+      responses:
+        '200':
+          description: 成功设置点位数据
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 0
+                  errMsg:
+                    type: string
+                    example: 'ok'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 400
+                  errMsg:
+                    type: string
+                    example: 'Invalid input'
+                  subMessages:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: 设备未找到
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 404
+                  errMsg:
+                    type: string
+                    example: 'Slave not found'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errCode:
+                    type: integer
+                    example: 500
+                  errMsg:
+                    type: string
+                    example: '服务器内部错误'
