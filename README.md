@@ -1,6 +1,15 @@
 # Modbus 模拟器
 
+[![Demo](https://img.shields.io/badge/demo-online-green)](https://emulator.chuangyun.work/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Bun](https://img.shields.io/badge/bun-%5E1.0.0-orange)](https://bun.sh)
+
 一个支持多从站设备的 Modbus TCP 模拟器，提供 HTTP API 接口用于管理和控制模拟设备。
+
+## 在线使用
+
+直接在线访问，并可以支持 Modbus 主站远程连接
+[https://emulator.chuangyun.work/](https://emulator.chuangyun.work/)
 
 ## 功能特性
 
@@ -26,19 +35,22 @@ bun run src/app.ts
 ```
 
 启动后：
+
 - Modbus TCP 服务器监听端口：**502**
-- HTTP API 服务器监听端口：**3000**
+- HTTP API 服务器监听端口：**4000**
 
 ## API 接口文档
 
 ### 从站管理
 
 #### 获取所有从站列表
+
 ```http
 GET /api/slaves
 ```
 
 响应示例：
+
 ```json
 {
   "success": true,
@@ -50,11 +62,13 @@ GET /api/slaves
 ```
 
 #### 获取从站信息
+
 ```http
 GET /api/slaves/:slaveId
 ```
 
 #### 创建新从站
+
 ```http
 POST /api/slaves
 Content-Type: application/json
@@ -71,6 +85,7 @@ Content-Type: application/json
 ```
 
 #### 删除从站
+
 ```http
 DELETE /api/slaves/:slaveId
 ```
@@ -80,12 +95,14 @@ DELETE /api/slaves/:slaveId
 #### Coils (线圈)
 
 **查询 Coils 数据**
+
 ```http
 GET /api/slaves/:slaveId/coils
 GET /api/slaves/:slaveId/coils?address=0&length=10  # 查询指定范围
 ```
 
 **设置 Coils 数据**
+
 ```http
 POST /api/slaves/:slaveId/coils
 Content-Type: application/json
@@ -155,9 +172,9 @@ curl -X POST http://localhost:3000/api/slaves \
 
 ## 技术栈
 
-- **运行时**: Bun v1.2.10
-- **语言**: TypeScript
-- **Modbus 库**: njs-modbus
+- **运行时**: [Bun](https://bun.sh)
+- **语言**: [TypeScript](https://www.typescriptlang.org/)
+- **Modbus 库**: [njs-modbus](https://github.com/MaxMech/njs-modbus)
 - **HTTP 服务器**: Bun.serve (Bun 原生 HTTP 服务器)
 
 ## 项目结构
@@ -165,7 +182,7 @@ curl -X POST http://localhost:3000/api/slaves \
 ```
 emulator/
 ├── src/
-│   ├── app.ts          # 主程序（多从站管理 + HTTP API）
+│   ├── app.ts          # 主程序（多站管理 + HTTP API）
 │   ├── power-mock.ts   # 异步版本从站模拟器
 │   └── server.ts       # TCP 服务器
 ├── package.json
