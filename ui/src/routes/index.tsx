@@ -5,6 +5,7 @@ export const Route = createFileRoute('/')({
 });
 
 function HomePage() {
+  const tcpAddress = '8.145.40.40:502';
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="text-center mb-12">
@@ -16,11 +17,11 @@ function HomePage() {
         <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">快速开始</h2>
           <p className="text-gray-600 mb-4">
-            连接地址：<span className="font-mono bg-gray-100 px-2 py-1 rounded">172.16.1.10:502</span>
+            连接地址：<span className="font-mono bg-gray-100 px-2 py-1 rounded">{tcpAddress}</span>
           </p>
           <p className="text-gray-600 mb-4">选择设备列表中的任意设备进行访问和测试。</p>
-          <Link to="/" className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-            查看设备列表
+          <Link to="/devices/$deviceId" params={{ deviceId: '1' }} className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            查看设备
           </Link>
         </div>
 
@@ -51,7 +52,7 @@ function HomePage() {
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">使用说明</h2>
         <div className="text-gray-600 space-y-2">
           <p>
-            1. 使用Modbus主站软件连接到地址 <span className="font-mono">172.16.1.10:502</span>
+            1. 使用Modbus主站软件连接到地址 <span className="font-mono">{tcpAddress}</span>
           </p>
           <p>2. 选择合适的从站ID（设备ID）</p>
           <p>3. 通过协议读写数据或使用本界面直接查看和修改</p>

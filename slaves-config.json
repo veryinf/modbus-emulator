@@ -1,0 +1,24 @@
+[
+  {
+    "slaveId": 1,
+    "title": "默认从站",
+    "protocol": "modbus-rtuOverTcp",
+    "points": {
+      "coils": [{ "address": 0, "value": false }],
+      "discreteInputs": [{ "address": 0, "value": false }],
+      "holdingRegisters": [{ "address": 0, "value": 65532 }],
+      "inputRegisters": [{ "address": 0, "value": 0 }]
+    }
+  },
+  {
+    "slaveId": 2,
+    "title": "默认从站2",
+    "protocol": "modbus-tcp",
+    "points": {
+      "coils": [{ "address": 0, "value": false }],
+      "discreteInputs": [{ "address": 0, "value": false }],
+      "holdingRegisters": [{ "address": 0, "value": 255 }],
+      "inputRegisters": [{ "address": 0, "value": 0 }]
+    }
+  }
+]

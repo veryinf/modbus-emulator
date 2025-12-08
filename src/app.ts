@@ -1,6 +1,8 @@
 import { createRoutes } from './api/router';
 import { SlaveManager } from './slave-manager';
 import { ProtocolType } from './types';
+import { validateConfig } from './config-validator';
+import { u } from '../ui/dist/assets/index-BbN0Rzme';
 
 // 创建从站管理器实例
 const slaveManager = new SlaveManager(502);
@@ -8,37 +10,27 @@ const slaveManager = new SlaveManager(502);
 // 初始化默认从站
 async function startSlaves() {
   try {
-    // 创建一个 RTU over TCP 协议的从站
-    await slaveManager.createSlave(
-      {
-        slaveId: 1,
-        title: '默认从站',
-        protocol: ProtocolType.MODBUS_RTUOVERTCP,
-      },
-      {
-        coils: [{ address: 0, value: false }],
-        discreteInputs: [{ address: 0, value: false }],
-        holdingRegisters: [{ address: 0, value: 0x00fc }],
-        inputRegisters: [{ address: 0, value: 0x0000 }],
-      },
-    );
+    // 从配置文件读取从站配置
+    const configText = await Bun.file('slaves-config.json').text();
+    const parsedConfig = JSON.parse(configText);
 
-    // 创建一个 Modbus TCP 协议的从站
-    await slaveManager.createSlave(
-      {
-        slaveId: 2,
-        title: '默认从站2',
-        protocol: ProtocolType.MODBUS_TCP,
-      },
-      {
-        coils: [{ address: 0, value: false }],
-        discreteInputs: [{ address: 0, value: false }],
-        holdingRegisters: [{ address: 0, value: 0x00ff }],
-        inputRegisters: [{ address: 0, value: 0x0000 }],
-      },
-    );
+    // 使用 Zod 验证配置
+    const slavesConfig = validateConfig(parsedConfig);
+
+    // 根据配置创建从站
+    for (const slaveConfig of slavesConfig) {
+      await slaveManager.createSlave(
+        {
+          slaveId: slaveConfig.slaveId,
+          title: slaveConfig.title,
+          protocol: slaveConfig.protocol as ProtocolType,
+        },
+        slaveConfig.points as any,
+      );
+    }
   } catch (error) {
     console.error('初始化默认从站失败:', error);
+    process.exit(1);
   }
 }
 
@@ -54,12 +46,13 @@ async function start() {
     idleTimeout: 0,
     port: HTTP_PORT,
     routes: createRoutes(slaveManager),
+    //development: false,
   });
 
   console.log(`\n🚀 Modbus 模拟器已启动`);
   console.log(`🌐 HTTP API 服务器: http://localhost:${HTTP_PORT}`);
   console.log(`\n📚 API 文档:`);
-  console.log(`   GET  /api/slaves             - 获取所有从站数据`);
+  console.log(`   GET  /api/slaves           - 获取所有从站数据`);
   console.log(`   GET  /api/slaves/:slaveId  - 获取指定从站数据`);
   console.log(`   POST /api/data-points      - 设置单个数据点`);
   console.log(``);

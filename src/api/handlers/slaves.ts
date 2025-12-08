@@ -3,6 +3,7 @@ import type { SlaveManager } from '../../slave-manager';
 import type { SlavePoints } from '../../types';
 import z from 'zod';
 import { PointChangeEvent } from '../../slave-manager';
+import { server } from 'typescript';
 
 export async function handleGetSlaves(slaveManager: SlaveManager): Promise<Response> {
   const slaveIds = slaveManager.getAllSlaveIds();
