@@ -21,6 +21,8 @@
   - Input Registers (输入寄存器，只读)
 - ✅ RESTful HTTP API 接口
 - ✅ 实时查询和设置设备数据
+- ✅ Server-Sent Events (SSE) 实时数据点变更通知
+- ✅ 配置文件初始化从站设备
 
 ## 安装依赖
 
@@ -53,10 +55,19 @@ GET /api/slaves
 
 ```json
 {
-  "success": true,
-  "data": [
-    { "slaveId": 1, "status": "active" },
-    { "slaveId": 2, "status": "active" }
+  "errCode": 0,
+  "errMsg": "ok",
+  "dataSet": [
+    { 
+      "slaveId": 1, 
+      "title": "默认从站",
+      "protocol": "modbus-tcp"
+    },
+    { 
+      "slaveId": 2, 
+      "title": "默认从站2",
+      "protocol": "modbus-rtuOverTcp"
+    }
   ]
 }
 ```
@@ -67,81 +78,83 @@ GET /api/slaves
 GET /api/slaves/:slaveId
 ```
 
-#### 创建新从站
+响应示例：
 
-```http
-POST /api/slaves
-Content-Type: application/json
-
+```json
 {
-  "slaveId": 2,  // 可选，不提供则自动分配
-  "initPoints": {
-    "coils": [{ "address": 0, "value": false }],
-    "discreteInputs": [{ "address": 0, "value": true }],
-    "holdingRegisters": [{ "address": 0, "value": 0x00fc }],
-    "inputRegisters": [{ "address": 0, "value": 0x0000 }]
+  "errCode": 0,
+  "errMsg": "ok",
+  "data": {
+    "slaveId": 1,
+    "title": "默认从站",
+    "protocol": "modbus-tcp",
+    "points": {
+      "coils": [
+        { "address": 0, "value": false }
+      ],
+      "discreteInputs": [
+        { "address": 0, "value": false }
+      ],
+      "holdingRegisters": [
+        { "address": 0, "value": 65532 }
+      ],
+      "inputRegisters": [
+        { "address": 0, "value": 0 }
+      ]
+    }
   }
 }
 ```
 
-#### 删除从站
-
-```http
-DELETE /api/slaves/:slaveId
-```
-
 ### 数据操作
 
-#### Coils (线圈)
-
-**查询 Coils 数据**
+#### 设置单个点位数据
 
 ```http
-GET /api/slaves/:slaveId/coils
-GET /api/slaves/:slaveId/coils?address=0&length=10  # 查询指定范围
-```
-
-**设置 Coils 数据**
-
-```http
-POST /api/slaves/:slaveId/coils
+POST /api/slaves/:slaveId/set-point
 Content-Type: application/json
+```
 
-# 单个设置
-{
-  "address": 0,
-  "value": true
-}
+请求体：
 
-# 批量设置
+```json
 {
-  "data": [
-    { "address": 0, "value": true },
-    { "address": 1, "value": false }
-  ]
+  "type": "coils",             // 数据类型: coils, discreteInputs, holdingRegisters, inputRegisters
+  "address": 0,                // 地址
+  "value": true                // 值
 }
 ```
 
-#### Discrete Inputs (离散输入)
+响应示例：
 
-```http
-GET /api/slaves/:slaveId/discrete-inputs
-POST /api/slaves/:slaveId/discrete-inputs
+```json
+{
+  "errCode": 0,
+  "errMsg": "ok"
+}
 ```
 
-#### Holding Registers (保持寄存器)
+#### 订阅数据点变更事件
 
 ```http
-GET /api/slaves/:slaveId/holding-registers
-POST /api/slaves/:slaveId/holding-registers
+GET /api/slaves/:slaveId/subscribe
 ```
 
-#### Input Registers (输入寄存器)
+使用 Server-Sent Events (SSE) 实时接收数据点变更通知。
+
+响应示例：
+
+```text
+data: {"type":"pointChange","slaveId":1,"pointType":"coils","address":0,"value":true}
+```
+
+### 静态资源
 
 ```http
-GET /api/slaves/:slaveId/input-registers
-POST /api/slaves/:slaveId/input-registers
+GET /*
 ```
+
+提供UI静态资源访问。
 
 ## 使用示例
 
@@ -149,25 +162,23 @@ POST /api/slaves/:slaveId/input-registers
 
 ```bash
 # 获取所有从站
-curl http://localhost:3000/api/slaves
+curl http://localhost:4000/api/slaves
 
 # 获取从站 1 的所有数据
-curl http://localhost:3000/api/slaves/1
+curl http://localhost:4000/api/slaves/1
 
 # 设置从站 1 的 Coil 0 为 true
-curl -X POST http://localhost:3000/api/slaves/1/coils \
+curl -X POST http://localhost:4000/api/slaves/1/set-point \
   -H "Content-Type: application/json" \
-  -d '{"address": 0, "value": true}'
+  -d '{"type": "coils", "address": 0, "value": true}'
 
-# 设置从站 1 的 Holding Register 0 为 0x1234
-curl -X POST http://localhost:3000/api/slaves/1/holding-registers \
+# 设置从站 1 的 Holding Register 0 为 255
+curl -X POST http://localhost:4000/api/slaves/1/set-point \
   -H "Content-Type: application/json" \
-  -d '{"address": 0, "value": 4660}'
+  -d '{"type": "holdingRegisters", "address": 0, "value": 255}'
 
-# 创建新从站
-curl -X POST http://localhost:3000/api/slaves \
-  -H "Content-Type: application/json" \
-  -d '{"slaveId": 2, "initPoints": {"coils": [{"address": 0, "value": false}]}}'
+# 订阅从站 1 的数据点变更事件
+curl http://localhost:4000/api/slaves/1/subscribe
 ```
 
 ## 技术栈
@@ -176,16 +187,38 @@ curl -X POST http://localhost:3000/api/slaves \
 - **语言**: [TypeScript](https://www.typescriptlang.org/)
 - **Modbus 库**: [njs-modbus](https://github.com/MaxMech/njs-modbus)
 - **HTTP 服务器**: Bun.serve (Bun 原生 HTTP 服务器)
+- **数据验证**: [Zod](https://zod.dev/)
 
 ## 项目结构
 
 ```
 emulator/
 ├── src/
-│   ├── app.ts          # 主程序（多站管理 + HTTP API）
-│   ├── power-mock.ts   # 异步版本从站模拟器
-│   └── server.ts       # TCP 服务器
+│   ├── app.ts                    # 主程序（多站管理 + HTTP API）
+│   ├── power-mock.ts             # 异步版本从站模拟器
+│   ├── server.ts                 # TCP 服务器
+│   ├── slave-manager.ts          # 从站管理器
+│   ├── types.ts                  # 类型定义
+│   ├── config-validator.ts       # 配置验证器
+│   ├── api/
+│   │   ├── router.ts             # API路由
+│   │   └── handlers/
+│   │       └── slaves.ts         # 从站处理器
+│   └── ui/                       # 前端界面
 ├── package.json
 ├── tsconfig.json
+├── slaves-config.json            # 从站配置文件
 └── README.md
 ```
+
+## 配置文件
+
+项目支持通过 `slaves-config.json` 文件初始化从站设备，启动时会自动加载该文件中的配置。
+
+## Go语言版本
+
+本项目同时提供了一个Go语言实现的版本，位于 [go](./go/) 目录下，具有相同的API接口和功能。
+
+## 许可证
+
+MIT
