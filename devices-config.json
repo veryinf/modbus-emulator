@@ -1,0 +1,74 @@
+{
+  "devices": [
+    {
+      "slaveId": 1,
+      "protocol": "tcp",
+      "title": "Test Device 1",
+      "description": "Test Modbus TCP device with predefined points",
+      "points": {
+        "coils": {
+          "0": true,
+          "1": false,
+          "2": true,
+          "3": false,
+          "4": true
+        },
+        "discreteInputs": {
+          "0": true,
+          "1": true,
+          "2": false,
+          "3": true
+        },
+        "inputRegisters": {
+          "0": 1234,
+          "1": 5678,
+          "2": 9012
+        },
+        "holdingRegisters": {
+          "0": 4321,
+          "1": 8765,
+          "2": 2109,
+          "3": 3333,
+          "4": 5555
+        }
+      }
+    },
+    {
+      "slaveId": 2,
+      "protocol": "rtu-over-tcp",
+      "title": "Test Device 2",
+      "description": "Test Modbus RTU over TCP device with predefined points",
+      "points": {
+        "coils": {
+          "0": false,
+          "1": true,
+          "2": false,
+          "3": true,
+          "4": false,
+          "5": true
+        },
+        "discreteInputs": {
+          "0": false,
+          "1": false,
+          "2": true,
+          "3": false,
+          "4": true
+        },
+        "inputRegisters": {
+          "0": 1111,
+          "1": 2222,
+          "2": 3333,
+          "3": 4444
+        },
+        "holdingRegisters": {
+          "0": 9999,
+          "1": 8888,
+          "2": 7777,
+          "3": 6666,
+          "4": 5555,
+          "5": 4444
+        }
+      }
+    }
+  ]
+}
