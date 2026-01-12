@@ -21,9 +21,10 @@ type DeviceInstance struct {
 
 // Manager manages Modbus slave devices
 type Manager struct {
-	devices   map[uint8]*DeviceInstance
-	mu        sync.RWMutex
-	netServer *common.NetServer
+	devices          map[uint8]*DeviceInstance
+	mu               sync.RWMutex
+	netServer        *common.NetServer
+	listeningAddress string
 }
 
 // NewManager creates a new slave manager
@@ -36,6 +37,7 @@ func NewManager() *Manager {
 
 // StartListening sets the Modbus TCP server listening address
 func (m *Manager) StartListening(address string) {
+	m.listeningAddress = address
 	go func() {
 		log.Printf("Starting TCP server on %s for all Modbus devices", address)
 		// Use gnet.Run to start the server with tcp:// protocol
@@ -46,13 +48,17 @@ func (m *Manager) StartListening(address string) {
 	}()
 }
 
+func (m *Manager) GetAddress() string {
+	return m.listeningAddress
+}
+
 func (m *Manager) AddDevice(config *core.DeviceConfig) {
 	deviceInfo := &slave.DeviceInfo{
 		Title: config.Title,
 		Identification: &common.DeviceIdentification{
 			VendorName:     "Veryinf Inc.",
 			ProductCode:    "Modbus-Emulator-001",
-			ProductName:    fmt.Sprintf("ME %s %s", lo.Ternary(config.Protocol == core.ProtocolTypeRTUOverTCP, "RTU", "TCP"), config.SlaveID),
+			ProductName:    fmt.Sprintf("ME %s %d", lo.Ternary(config.Protocol == core.ProtocolTypeRTUOverTCP, "RTU", "TCP"), config.SlaveID),
 			ProductVersion: "1.0.0",
 			VendorUrl:      "https://github.com/veryinf/modbus-emulator",
 		},

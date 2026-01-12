@@ -1,4 +1,13 @@
 {
+  "ui": {
+    "host": "127.0.0.1",
+    "port": 502,
+    "email": "345435142@qq.com",
+    "phone": "+86 123 4567 8910",
+    "address": "北京市海淀区中关村科技园",
+    "workingHours": "周一至周五 9:00-18:00",
+    "website": "https://emulator.chuangyun.work/"
+  },
   "devices": [
     {
       "slaveId": 1,

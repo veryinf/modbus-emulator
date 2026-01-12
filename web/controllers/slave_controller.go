@@ -5,19 +5,21 @@ import (
 	"log/slog"
 	"strconv"
 
+	"veryinf/emulator/core"
+	"veryinf/emulator/slave"
+	"veryinf/emulator/web/common"
+
 	"github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	modbusSlave "github.com/veryinf/modbus-kit/slave"
-	"veryinf/emulator/core"
-	"veryinf/emulator/slave"
-	"veryinf/emulator/web/common"
 )
 
 // SlaveController handles slave-related API requests
 type SlaveController struct {
 	common.BaseHandler
 	SlaveManager *slave.Manager
+	Config       *core.Config
 }
 
 type PointValue struct {
@@ -26,14 +28,20 @@ type PointValue struct {
 	Value   uint16 `json:"value"`
 }
 
+// GetApplication handles getting connection info and UI config
+func (h *SlaveController) GetApplication(ctx echo.Context) error {
+	return core.NewData(h.Config.UI)
+}
+
 // GetAllSlaves handles getting all slaves
 func (h *SlaveController) GetAllSlaves(ctx echo.Context) error {
 	devices := h.SlaveManager.ListDevices()
 	ds := lo.Map(devices, func(device *slave.DeviceInstance, index int) map[string]any {
 		return map[string]any{
-			"slaveId":  device.Config.SlaveID,
-			"title":    device.Config.Title,
-			"protocol": string(device.Config.Protocol),
+			"slaveId":     device.Config.SlaveID,
+			"title":       device.Config.Title,
+			"description": device.Config.Description,
+			"protocol":    string(device.Config.Protocol),
 		}
 	})
 
@@ -61,9 +69,10 @@ func (h *SlaveController) GetSlave(ctx echo.Context) error {
 		}
 	})
 	ret := map[string]any{
-		"slaveId":  device.Config.SlaveID,
-		"title":    device.Config.Title,
-		"protocol": string(device.Config.Protocol),
+		"slaveId":     device.Config.SlaveID,
+		"title":       device.Config.Title,
+		"description": device.Config.Description,
+		"protocol":    string(device.Config.Protocol),
 		"points": map[string]any{
 			"coils": lo.Filter(points, func(point PointValue, index int) bool { return point.Type == string(modbusSlave.PointTypeCoil) }),
 			"discreteInputs": lo.Filter(points, func(point PointValue, index int) bool {

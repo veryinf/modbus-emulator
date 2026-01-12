@@ -2,7 +2,7 @@
 
 A high-performance, web-based Modbus slave device simulator that allows you to create and manage multiple Modbus slave devices simultaneously, supporting both Modbus TCP and Modbus RTU over TCP protocols. Similar to Modbus Slave, but with a modern web interface and enhanced features.
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/veryinf/emulator-go)](https://goreportcard.com/report/github.com/veryinf/emulator-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/veryinf/modbus-emulator)](https://goreportcard.com/report/github.com/veryinf/modbus-emulator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Table of Contents
@@ -68,9 +68,9 @@ The simulator is an excellent tool for training sessions and demonstrations. It 
 
 ### Recommended: Download from Release
 
-The easiest way to get started is to download the pre-built binary from the [Release](https://github.com/veryinf/emulator-go/releases) page:
+The easiest way to get started is to download the pre-built binary from the [Release](https://github.com/veryinf/modbus-emulator/releases) page:
 
-1. Go to the [Release](https://github.com/veryinf/emulator-go/releases) page
+1. Go to the [Release](https://github.com/veryinf/modbus-emulator/releases) page
 2. Download the appropriate binary for your operating system
 3. Run the binary file
 4. Open your web browser and navigate to http://localhost:8080
@@ -82,8 +82,8 @@ If you prefer to run from source, follow these steps:
 #### 1. Download or Clone the Repository
 
 ```bash
-git clone https://github.com/veryinf/emulator-go.git
-cd emulator-go
+git clone https://github.com/veryinf/modbus-emulator.git
+cd modbus-emulator
 ```
 
 #### 2. Run the Application
@@ -261,7 +261,7 @@ This project is licensed under the [MIT License](LICENSE) - see the LICENSE file
 
 ## Support
 
-For issues, questions, or suggestions, please open an [issue](https://github.com/veryinf/emulator-go/issues) on GitHub.
+For issues, questions, or suggestions, please open an [issue](https://github.com/veryinf/modbus-emulator/issues) on GitHub.
 
 ## Language Support
 

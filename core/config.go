@@ -15,8 +15,20 @@ const (
 	ProtocolTypeRTUOverTCP ProtocolType = "rtu-over-tcp"
 )
 
+// UIConfig represents the UI configuration in the config file
+type UIConfig struct {
+	Host          string `json:"host"`
+	Port          int    `json:"port"`
+	Email         string `json:"email"`
+	Phone         string `json:"phone"`
+	Address       string `json:"address"`
+	WorkingHours  string `json:"workingHours"`
+	Website       string `json:"website"`
+}
+
 // Config represents the application configuration
 type Config struct {
+	UI      UIConfig       `json:"ui"`
 	Devices []DeviceConfig `json:"devices"`
 }
 

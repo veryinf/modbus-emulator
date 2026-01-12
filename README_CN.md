@@ -2,7 +2,7 @@
 
 一个基于Go语言开发的高性能Modbus从站设备模拟器，支持Modbus TCP和Modbus RTU over TCP两种协议，提供现代化的Web界面，可直接通过浏览器访问和管理。
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/veryinf/emulator-go)](https://goreportcard.com/report/github.com/veryinf/emulator-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/veryinf/modbus-emulator)](https://goreportcard.com/report/github.com/veryinf/modbus-emulator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 目录
@@ -68,9 +68,9 @@ Modbus从站模拟器是一款功能强大、易于使用的Web应用程序，�
 
 ### 推荐：从Release下载
 
-最简单的开始方式是从[Release](https://github.com/veryinf/emulator-go/releases)页面下载预构建的二进制文件：
+最简单的开始方式是从[Release](https://github.com/veryinf/modbus-emulator/releases)页面下载预构建的二进制文件：
 
-1. 访问[Release](https://github.com/veryinf/emulator-go/releases)页面
+1. 访问[Release](https://github.com/veryinf/modbus-emulator/releases)页面
 2. 下载适合您操作系统的二进制文件
 3. 运行二进制文件
 4. 打开Web浏览器，导航至 http://localhost:8080
@@ -82,8 +82,8 @@ Modbus从站模拟器是一款功能强大、易于使用的Web应用程序，�
 #### 1. 下载或克隆仓库
 
 ```bash
-git clone https://github.com/veryinf/emulator-go.git
-cd emulator-go
+git clone https://github.com/veryinf/modbus-emulator.git
+cd modbus-emulator
 ```
 
 #### 2. 运行应用程序
@@ -230,7 +230,7 @@ http://localhost:4000
 
 ## 支持与反馈
 
-如有问题、疑问或建议，请在GitHub上提交[issue](https://github.com/veryinf/emulator-go/issues)。
+如有问题、疑问或建议，请在GitHub上提交[issue](https://github.com/veryinf/modbus-emulator/issues)。
 
 ## 语言支持
 

@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 工业风格动画 */
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-progress {
+  animation: progress 2s ease-out forwards;
+}
+
+/* 卡片悬停效果 */
+.feature-card {
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 科技感装饰线条 */
+.tech-line {
+  position: relative;
+}
+
+.tech-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(to right, #3b82f6, #1d4ed8);
+  border-radius: 2px;
+}
+
+/* 工业风格背景图案 */
+.industrial-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.1) 1px, transparent 0);
+  background-size: 20px 20px;
+}

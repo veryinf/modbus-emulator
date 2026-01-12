@@ -5,12 +5,13 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"veryinf/emulator/core"
 	"veryinf/emulator/slave"
 	"veryinf/emulator/web/common"
 	"veryinf/emulator/web/controllers"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
@@ -22,14 +23,14 @@ type Server struct {
 	*echo.Echo
 }
 
-// NewServer creates a new web server with the given slave manager
-func NewServer(slaveMgr *slave.Manager) *Server {
-	e := InitHttpServer(slaveMgr)
+// NewServer creates a new web server with the given slave manager and config
+func NewServer(slaveMgr *slave.Manager, config *core.Config) *Server {
+	e := InitHttpServer(slaveMgr, config)
 	return &Server{Echo: e}
 }
 
-// InitHttpServer initializes the HTTP server with the given slave manager
-func InitHttpServer(slaveMgr *slave.Manager) *echo.Echo {
+// InitHttpServer initializes the HTTP server with the given slave manager and config
+func InitHttpServer(slaveMgr *slave.Manager, config *core.Config) *echo.Echo {
 	e := echo.New()
 	e.Debug = true
 	e.HideBanner = true
@@ -75,7 +76,8 @@ func InitHttpServer(slaveMgr *slave.Manager) *echo.Echo {
 	api := e.Group(apiPrefix)
 
 	// Slave routes
-	slaveHandler := &controllers.SlaveController{BaseHandler: baseController, SlaveManager: slaveMgr}
+	slaveHandler := &controllers.SlaveController{BaseHandler: baseController, SlaveManager: slaveMgr, Config: config}
+	api.GET("/application", slaveHandler.GetApplication)
 	api.GET("/slaves", slaveHandler.GetAllSlaves)
 	api.GET("/slaves/:slaveId", slaveHandler.GetSlave)
 	api.POST("/slaves/:slaveId/set-point", slaveHandler.SetPoint)

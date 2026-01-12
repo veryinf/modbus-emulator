@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -12,18 +15,52 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+      
+      - name: Install UI dependencies
+        working-directory: ./ui
+        run: pnpm install
+      
+      - name: Build UI
+        working-directory: ./ui
+        run: pnpm run build
+      
+      - name: Copy UI build to public directory
+        run: rm -rf ./public && cp -r ./ui/dist ./public
+      
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: '1.25.3'
+          cache: true
       
-      - name: Build binary
-        run: go build -o emulator-go ./cmd/main.go
+      - name: Extract Git tag
+        id: extract_tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      
+      - name: Build binary for multiple platforms
+        run: |
+          mkdir -p dist
+          BUILD_TIME=$(date -u +'%Y%m%d%H%M')
+          # Build for Linux
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -ldflags="-X 'veryinf/emulator/core.buildEnv=production'" -ldflags="-X 'veryinf/emulator/core.buildTime=$BUILD_TIME'" -ldflags="-X veryinf/emulator/core.buildVersion=${{ env.VERSION }}" -o dist/me-linux-amd64 ./cmd/main.go
+          # Build for Windows
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -ldflags="-X 'veryinf/emulator/core.buildEnv=production'" -ldflags="-X 'veryinf/emulator/core.buildTime=$BUILD_TIME'" -ldflags="-X veryinf/emulator/core.buildVersion=${{ env.VERSION }}" -o dist/me-windows-amd64.exe ./cmd/main.go
+          # Build for macOS
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -ldflags="-X 'veryinf/emulator/core.buildEnv=production'" -ldflags="-X 'veryinf/emulator/core.buildTime=$BUILD_TIME'" -ldflags="-X veryinf/emulator/core.buildVersion=${{ env.VERSION }}" -o dist/me-darwin-amd64 ./cmd/main.go
+      
+
       
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: emulator-go
+          files: dist/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

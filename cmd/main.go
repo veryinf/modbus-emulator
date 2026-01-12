@@ -6,11 +6,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/labstack/echo/v4"
-	"github.com/urfave/cli/v3"
 	"veryinf/emulator/core"
 	"veryinf/emulator/slave"
 	"veryinf/emulator/web"
+
+	"github.com/labstack/echo/v4"
+	"github.com/urfave/cli/v3"
 )
 
 // Config holds the application configuration
@@ -36,8 +37,8 @@ func runApp(ctx context.Context, cfg Config) error {
 	// Set Modbus TCP server listening address
 	slaveMgr.StartListening(cfg.ModbusAddr)
 
-	// Create and start web server with injected slave manager
-	webServer := web.InitHttpServer(slaveMgr)
+	// Create and start web server with injected slave manager and config
+	webServer := web.InitHttpServer(slaveMgr, config)
 	defer func(webServer *echo.Echo) {
 		_ = webServer.Close()
 	}(webServer)
@@ -48,26 +49,35 @@ func runApp(ctx context.Context, cfg Config) error {
 	return nil
 }
 
+func init() {
+	cli.VersionPrinter = func(c *cli.Command) {
+		core.G.PrintWelcome()
+	}
+}
+
 func main() {
 	app := &cli.Command{
-		Name:    "modbus-slave-simulator",
-		Usage:   "A high-performance, web-based Modbus slave device simulator",
-		Version: "1.0.0",
+		Name:    "modbus-emulator",
+		Usage:   "A high-performance, web-based Modbus slave device emulator",
+		Version: core.G.BuildVersion(),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "http-addr",
-				Value: ":4000",
-				Usage: "specify the HTTP server address",
+				Name:    "http-addr",
+				Value:   ":4000",
+				Usage:   "specify the HTTP server address",
+				Sources: cli.EnvVars("HTTP_ADDR"),
 			},
 			&cli.StringFlag{
-				Name:  "modbus-addr",
-				Value: ":502",
-				Usage: "specify the Modbus TCP server address",
+				Name:    "modbus-addr",
+				Value:   ":502",
+				Usage:   "specify the Modbus TCP server address",
+				Sources: cli.EnvVars("MODBUS_ADDR"),
 			},
 			&cli.StringFlag{
-				Name:  "config",
-				Value: "devices-config.json",
-				Usage: "specify the device configuration file path",
+				Name:    "config",
+				Value:   "config.json",
+				Usage:   "specify the device configuration file path",
+				Sources: cli.EnvVars("CONFIG_FILE"),
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
